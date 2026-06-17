@@ -1,6 +1,6 @@
 # tongflow-modal-gemma4
 
-Official TongFlow plugin. Multimodal understanding with **Gemma-4** (`google/gemma-4-E4B-it`), running on a GPU via [Modal](https://modal.com). Describes or answers questions about images and video.
+Official [TongFlow](https://github.com/tong-io/tongflow) plugin. Multimodal understanding with **Gemma-4** (`google/gemma-4-E4B-it`), running on a GPU via [Modal](https://modal.com). Describes or answers questions about images and video.
 
 ## Capabilities
 

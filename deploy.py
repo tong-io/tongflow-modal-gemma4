@@ -37,7 +37,9 @@ from tongflow.slots import node_slot
 app = modal.App(Path(__file__).resolve().parent.name)
 
 image = (
-    modal.Image.from_registry("pytorch/pytorch:2.5.1-cuda12.4-cudnn9-devel")
+    # transformers 5.x's audio encoder path (create_bidirectional_mask)
+    # requires torch>=2.6; 2.5.1 broke audio-describe at runtime.
+    modal.Image.from_registry("pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel")
     .apt_install("ffmpeg")
     .pip_install(
         "tongflow==0.2.2",

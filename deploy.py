@@ -22,6 +22,10 @@ MODEL_DIR = f"/models/{REPO_ID}"
 _volume_name = str(_cfg.get("volumeName") or "models")
 volume = modal.Volume.from_name(_volume_name, create_if_missing=True)
 
+from tongflow.models.audio_describe import (
+    AudioDescribeInput,
+    AudioDescribeOutput,
+)
 from tongflow.models.image_gen_text import ImageGenTextInput, ImageGenTextOutput
 from tongflow.models.video_gen_text import VideoGenTextInput, VideoGenTextOutput
 from tongflow.node_slots import NodeSlots
@@ -36,7 +40,7 @@ image = (
     modal.Image.from_registry("pytorch/pytorch:2.5.1-cuda12.4-cudnn9-devel")
     .apt_install("ffmpeg")
     .pip_install(
-        "tongflow==0.1.0",
+        "tongflow==0.2.2",
         "transformers==5.5.0",
         "accelerate==1.13.0",
         "torchvision",
@@ -295,6 +299,20 @@ class Inference:
             enable_thinking=bool(input.enable_thinking),
         )
         return ImageGenTextOutput(success=True, text=str(out.get("text", "")))
+
+    @modal.method()
+    @node_slot(NodeSlots.AUDIO_DESCRIBE)
+    def audio_describe(self, input: AudioDescribeInput) -> AudioDescribeOutput:
+        instruction = (
+            (input.userPrompt or "").strip()
+            or (input.text or "").strip()
+            or "Describe this audio in detail (genre, mood, instruments, vocals, notable events)."
+        )
+        out = self._generate_multimodal(
+            prompt=instruction,
+            audios=[prompt_media_to_bytes(input.audio)],
+        )
+        return AudioDescribeOutput(success=True, text=str(out.get("text", "")))
 
     @modal.method()
     @node_slot(NodeSlots.VIDEO_GEN_TEXT)

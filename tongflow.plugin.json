@@ -1,4 +1,9 @@
 {
+    "plugin": {
+        "name": "Gemma 4",
+        "description": "Multimodal understanding with Google Gemma-4 — describe or answer questions about images and video.",
+        "icon": "/plugins/tongflow-modal-gemma4.svg"
+    },
     "env": [
         {
             "key": "MODAL_TOKEN_ID",

@@ -42,7 +42,7 @@ image = (
     modal.Image.from_registry("pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel")
     .apt_install("ffmpeg")
     .pip_install(
-        "tongflow==0.2.2",
+        "tongflow==0.2.13", "fastapi[standard]",
         "transformers==5.5.0",
         "accelerate==1.13.0",
         "torchvision",
@@ -329,3 +329,18 @@ class Inference:
             enable_thinking=bool(input.enable_thinking),
         )
         return VideoGenTextOutput(success=True, text=str(out.get("text", "")))
+
+    @modal.fastapi_endpoint(method="GET", label=f"{Path(__file__).resolve().parent.name}-serve")
+    def serve(self, taskId: str = "", token: str = "", origin: str = ""):
+        from fastapi.responses import StreamingResponse
+        from tongflow import serve_stream_from_spec
+
+        return StreamingResponse(
+            serve_stream_from_spec(
+                origin, taskId, token, __file__,
+                invoke=lambda m, inp: getattr(self, m).local(inp),
+            ),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "Access-Control-Allow-Origin": "*"},
+        )
+

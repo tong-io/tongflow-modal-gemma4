@@ -42,7 +42,7 @@ image = (
     modal.Image.from_registry("pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel")
     .apt_install("ffmpeg")
     .pip_install(
-        "tongflow==0.2.13", "fastapi[standard]",
+        "tongflow==0.2.16", "fastapi[standard]",
         "transformers==5.5.0",
         "accelerate==1.13.0",
         "torchvision",

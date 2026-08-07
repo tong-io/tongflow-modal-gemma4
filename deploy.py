@@ -63,7 +63,7 @@ with image.imports():
 
 @deploy
 @app.cls(
-    scaledown_window=5,
+    scaledown_window=2,
     image=image,
     gpu="A10G",
     memory=4096,

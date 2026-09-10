@@ -30,7 +30,31 @@ from tongflow.models.image_gen_text import ImageGenTextInput, ImageGenTextOutput
 from tongflow.models.video_gen_text import VideoGenTextInput, VideoGenTextOutput
 from tongflow.node_slots import NodeSlots
 from tongflow.protocol import prompt_media_to_bytes
-from tongflow.slots import node_slot
+from tongflow.slots import current_params, node_slot
+
+
+def _adv(name: str, default):
+    """Advanced-section override (``TONGFLOW_SLOT_PARAMS``) or the plugin default."""
+    v = current_params().get(name)
+    if v is None:
+        return default
+    if isinstance(default, bool):
+        return bool(v)
+    if isinstance(default, int):
+        return int(v)
+    if isinstance(default, float):
+        return float(v)
+    return v
+
+# Per-run knobs offered under the node's collapsed "Advanced" section.
+# Pure literal (the platform scanner reads it by AST, never imports this
+# module). Values reach the handlers via current_params(); an untouched
+# control is absent there and falls back to the plugin default.
+TONGFLOW_SLOT_PARAMS = {
+    "audio-describe": {
+        "thinking": {"type": "boolean", "default": False, "label": "Thinking"},
+    },
+}
 
 # ── app ──────────────────────────────────────────────────────────────────────
 
@@ -42,7 +66,7 @@ image = (
     modal.Image.from_registry("pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel")
     .apt_install("ffmpeg")
     .pip_install(
-        "tongflow==0.2.21", "fastapi[standard]",
+        "tongflow==0.3.3", "fastapi[standard]",
         "transformers==5.5.0",
         "accelerate==1.13.0",
         "torchvision",
@@ -313,6 +337,7 @@ class Inference:
         out = self._generate_multimodal(
             prompt=instruction,
             audios=[prompt_media_to_bytes(input.audio)],
+            enable_thinking=_adv("thinking", False),
         )
         return AudioDescribeOutput(success=True, text=str(out.get("text", "")))
 
